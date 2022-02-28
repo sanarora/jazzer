@@ -17,6 +17,7 @@ package com.code_intelligence.jazzer.sanitizers
 import com.code_intelligence.jazzer.api.HookType
 import com.code_intelligence.jazzer.api.Jazzer
 import com.code_intelligence.jazzer.api.MethodHook
+import com.code_intelligence.jazzer.api.MethodHooks
 import java.lang.invoke.MethodHandle
 
 /**
@@ -25,7 +26,10 @@ import java.lang.invoke.MethodHandle
 @Suppress("unused_parameter", "unused")
 object ReflectiveCall {
 
-    @MethodHook(type = HookType.BEFORE, targetClassName = "java.lang.Class", targetMethod = "forName")
+    @MethodHooks(
+        MethodHook(type = HookType.BEFORE, targetClassName = "java.lang.Class", targetMethod = "forName"),
+        MethodHook(type = HookType.BEFORE, targetClassName = "java.lang.ClassLoader", targetMethod = "loadClass"),
+    )
     @JvmStatic
     fun classForNameHook(method: MethodHandle?, alwaysNull: Any?, args: Array<Any?>, hookId: Int) {
         val className = args[0] as? String ?: return
