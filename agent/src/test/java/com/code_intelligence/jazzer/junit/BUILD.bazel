@@ -1,0 +1,19 @@
+java_test(
+    name = "JazzerTestEngineTest",
+    srcs = ["JazzerTestEngineTest.java"],
+    deps = [
+        ":example_fuzz_tests",
+        "//agent/src/main/java/com/code_intelligence/jazzer/junit",
+        "@maven//:junit_junit",
+        "@maven//:org_junit_platform_junit_platform_engine",
+        "@maven//:org_junit_platform_junit_platform_testkit",
+    ],
+)
+
+java_library(
+    name = "example_fuzz_tests",
+    srcs = ["ExampleFuzzTests.java"],
+    deps = [
+        "//agent/src/main/java/com/code_intelligence/jazzer/junit:annotations",
+    ]
+)
