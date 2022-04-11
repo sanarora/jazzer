@@ -1,6 +1,5 @@
 package com.code_intelligence.jazzer.junit;
 
-import com.code_intelligence.jazzer.api.FuzzerSecurityIssueHigh;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.time.Duration;
@@ -57,7 +56,7 @@ public class JazzerTestEngine implements TestEngine {
   public void execute(ExecutionRequest executionRequest) {
     EngineExecutionListener listener = executionRequest.getEngineExecutionListener();
     executionRequest.getRootTestDescriptor().accept(testDescriptor -> {
-      if (!testDescriptor.isTest()) return;
+      if (!(testDescriptor instanceof JazzerFuzzTestDescriptor)) return;
       listener.executionStarted(testDescriptor);
       Instant start = Instant.now();
       while (Instant.now().isBefore(start.plus(Duration.ofSeconds(1)))) {
@@ -74,11 +73,11 @@ public class JazzerTestEngine implements TestEngine {
           ReportEntry.from("Fuzzing " + testDescriptor.getDisplayName(), "#3000 exec/s: 100"));
       while (Instant.now().isBefore(start.plus(Duration.ofSeconds(4)))) {
       }
-      if (testDescriptor.getDisplayName().contains("WithFinding")) {
-        listener.executionFinished(testDescriptor,
-            TestExecutionResult.failed(new FuzzerSecurityIssueHigh("Finding!")));
-      } else {
+      try {
+        ((JazzerFuzzTestDescriptor) testDescriptor).execute();
         listener.executionFinished(testDescriptor, TestExecutionResult.successful());
+      } catch (Throwable t) {
+        listener.executionFinished(testDescriptor, TestExecutionResult.failed(t));
       }
     });
 
@@ -100,8 +99,7 @@ public class JazzerTestEngine implements TestEngine {
   }
 
   private static boolean isFuzzTest(Method candidate) {
-    int modifiers = candidate.getModifiers();
-    if (!Modifier.isPublic(modifiers)) {
+    if (Modifier.isPrivate(candidate.getModifiers())) {
       return false;
     }
     if (AnnotationSupport.isAnnotated(candidate, FuzzTest.class)) {
