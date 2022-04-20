@@ -26,7 +26,7 @@ public class ExampleFuzzerWithNative {
   public static void fuzzerTestOneInput(FuzzedDataProvider data) {
     int val = data.consumeInt();
     String stringData = data.consumeRemainingAsString();
-    if (val == 17759716 && stringData.length() > 10 && stringData.contains("jazzer")) {
+    if (stringData.length() > 10) {
       // call native function which contains a crash
       new ExampleFuzzerWithNative().parse(stringData);
     }
